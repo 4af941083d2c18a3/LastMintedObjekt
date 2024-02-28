@@ -1,0 +1,49 @@
+<html>
+  <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <title>마지막 Minting</title>
+  </head>
+  <body>
+      <p>마지막 Minting된 오브젝트</p>
+      <input id="owner"><input id="id">
+      <button onclick="runImsi()">실행</button>
+      <p><span>구매 시각 : </span><span id="dt">12시 33분 30초 (지연된 시간 : 3시간 15분 55초)</span></p>
+      <p id="info">Kotone Cream01 112Z #383</p>
+    <script>
+        async function run2Imsi(ownerString,idString) {
+            var object = {owner:ownerString,id:idString}
+            var owner = object.owner
+            var SA = 0
+            do {
+                var ownerData = await fetch(`https://api.cosmo.fans/objekt/v1/owned-by/${owner}?sort=newest&limit=30&start_after=${SA}`)
+                var ownerjson = await ownerData.json()
+                var objekts = ownerjson.objekts
+
+                for (item of objekts) {
+                    if (item.tokenId == object.id) {
+                        var dt = new Date(item.mintedAt)
+                        var objektInfo = [item.member,item.season,item.collectionNo,"#"+item.objektNo].join(' ')
+                        return [dt,objektInfo]
+                    }
+                }
+
+                SA += 30
+            } while (true);
+        }
+
+        async function runImsi() {
+            var owner = document.querySelector('#owner').value
+            var id = document.querySelector('#id').value
+            document.querySelector('#dt').innerText = '값을 불러오는 중'
+            document.querySelector('#info').innerText = ''
+            var array = await run2Imsi(owner,id)
+            var dt1 = array[0]
+            var dt2 = new Date()
+            var delta_dt = new Date(dt2 - dt1 - 32400000)
+            var text = `${dt1.getHours()}시 ${dt1.getMinutes()}분 ${dt1.getSeconds()}초 (지연된 시간 : ${delta_dt.getHours()}시간 ${delta_dt.getMinutes()}분 ${delta_dt.getSeconds()}초)`
+            document.querySelector('#dt').innerText = text
+            document.querySelector('#info').innerText = array[1]
+        }
+    </script>
+  </body>
+</html>
